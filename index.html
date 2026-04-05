@@ -48,8 +48,12 @@
         let KEY = ""; let OK = false;
         document.getElementById('authBtn').onclick = () => {
             const k = document.getElementById('keyInput').value; const p = document.getElementById('passInput').value;
-            if(p === '33c' && k.startsWith('sk-or-')) { KEY=k; OK=true; document.getElementById('status').innerText="CONNECTION: ESTABLISHED"; document.getElementById('status').style.color="#00f2ff"; alert("HUB AUTHENTICATED"); }
-            else { alert("ACCESS DENIED"); }
+            if(p === '33c' && k.startsWith('sk-or-')) { 
+                KEY=k; OK=true; 
+                document.getElementById('status').innerText="CONNECTION: ESTABLISHED"; 
+                document.getElementById('status').style.color="#00f2ff"; 
+                alert("HUB AUTHENTICATED"); 
+            } else { alert("ACCESS DENIED"); }
         };
         async function send() {
             if(!OK) return; const val = document.getElementById('userInput').value;
@@ -57,11 +61,17 @@
             const u = document.createElement('div'); u.className='msg user'; u.innerText=val; chat.appendChild(u);
             const b = document.createElement('div'); b.className='msg bot'; b.innerText='Calculating...'; chat.appendChild(b);
             document.getElementById('userInput').value='';
-            const r = await fetch("https://openrouter.ai", {
-                method:"POST", headers:{"Authorization":`Bearer ${KEY}`,"Content-Type":"application/json"},
-                body:JSON.stringify({"model":"google/gemini-2.0-flash-lite-preview-02-05:free","messages":[{"role":"user","content":val}]})
-            });
-            const d = await r.json(); b.innerText = d.choices.message.content;
+            try {
+                const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method:"POST", 
+                    headers:{"Authorization":`Bearer ${KEY}`,"Content-Type":"application/json"},
+                    body:JSON.stringify({
+                        "model":"google/gemini-2.0-flash-lite-preview-02-05:free",
+                        "messages":[{"role":"user","content":val}]
+                    })
+                });
+                const d = await r.json(); b.innerText = d.choices[0].message.content;
+            } catch(e) { b.innerText = "CALCULATION ERROR: HANDSHAKE FAILED"; }
             chat.scrollTop = chat.scrollHeight;
         }
         document.getElementById('sendBtn').onclick = send;

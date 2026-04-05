@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORACLE | Core Intelligence</title>
+    <style>
+        :root { 
+            --oracle-cyan: #00f2ff; 
+            --oracle-black: #020202; 
+            --accent: var(--oracle-cyan); 
+            --border: rgba(0, 242, 255, 0.2); 
+            --bg-glass: rgba(255, 255, 255, 0.02);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--oracle-black); 
+            color: #fff; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+        @keyframes pulse { 
+            0%, 100% { filter: drop-shadow(0 0 2px var(--accent)); opacity: 0.8; } 
+            50% { filter: drop-shadow(0 0 12px var(--accent)); opacity: 1; } 
+        }
+        #oracle-nav { 
+            background: #080808; 
+            border-bottom: 2px solid var(--accent); 
+            padding: 15px 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 10;
+        }
+        .oracle-logo { width: 40px; height: 40px; animation: pulse 4s infinite; }
+        #core-container { flex: 1; display: flex; overflow: hidden; position: relative; }
+        #sidebar { 
+            width: 300px; background: #050505; border-right: 1px solid var(--border); 
+            padding: 25px; display: flex; flex-direction: column; gap: 20px; z-index: 6;
+        }
+        .module { 
+            background: #000; border: 1px solid var(--border); padding: 15px; 
+            border-top: 2px solid var(--accent);
+        }
+        .label { font-size: 9px; color: var(--accent); font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
+        #chat-viewport { flex: 1; display: flex; flex-direction: column; padding: 20px; background: #020202; z-index: 6; }
+        #chat-window { 
+            flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; 
+            gap: 15px; border: 1px solid var(--border); border-radius: 4px; 
+            margin-bottom: 20px; background: var(--bg-glass); scroll-behavior: smooth;
+        }
+        .msg { max-width: 85%; padding: 12px 18px; border-radius: 4px; font-size: 14px; line-height: 1.6; }
+        .user { align-self: flex-end; border: 1px solid var(--accent); color: var(--accent); background: rgba(0, 242, 255, 0.05); }
+        .bot { align-self: flex-start; background: #111; border-left: 2px solid var(--accent); }
+        #input-area { display: flex; gap: 10px; padding: 10px 20px; background: #080808; border: 1px solid var(--border); }
+        input { flex: 1; background: transparent; border: none; color: white; outline: none; font-family: monospace; }
+        button { 
+            background: var(--accent); border: none; color: #000; padding: 8px 20px; 
+            cursor: pointer; font-weight: 900; font-size: 11px; 
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <nav id="oracle-nav">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <svg class="oracle-logo" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#00f2ff" stroke-width="2" /><circle cx="50" cy="50" r="20" fill="none" stroke="#00f2ff" stroke-width="6" /></svg>
+            <h1 style="letter-spacing:12px; text-transform:uppercase; font-size: 1.2rem; font-weight: 300;">Oracle <span style="font-weight:900; letter-spacing: 2px;">AI</span></h1>
+        </div>
+        <div id="uplink-status" style="font-size: 9px; color: #333; font-weight: bold; letter-spacing: 2px;">CONNECTION: LOCKED</div>
+    </nav>
+    <div id="core-container">
+        <aside id="sidebar">
+            <div class="module">
+                <span class="label">Access Key</span>
+                <input type="password" id="keyInput" placeholder="OpenRouter API Key..." style="width:100%; background:#000; border-bottom:1px solid var(--accent); color:#fff; padding:8px; font-size:10px; margin: 8px 0; border-top:none; border-left:none; border-right:none;">
+                <span class="label" style="display:block; margin-top:10px;">Clearance Code</span>
+                <input type="password" id="passCode" placeholder="Enter Code..." style="width:100%; background:#000; border-bottom:1px solid var(--accent); color:#fff; padding:8px; font-size:10px; margin: 5px 0; border-top:none; border-left:none; border-right:none;">
+                <button id="saveKey" style="width:100%; margin-top:10px;">AUTHENTICATE</button>
+            </div>
+        </aside>
+        <main id="chat-viewport">
+            <div id="chat-window">
+                <div class="msg bot">Oracle AI online. Provide API key and Clearance Code to access the predictive core.</div>
+            </div>
+            <div id="input-area">
+                <input type="text" id="userInput" placeholder="Inquire the Oracle..." autocomplete="off">
+                <button id="sendBtn">EXECUTE</button>
+            </div>
+        </main>
+    </div>
+    <script>
+        let API_KEY = "";
+        let AUTHENTICATED = false;
+
+        document.getElementById('saveKey').onclick = () => {
+            const key = document.getElementById('keyInput').value.trim();
+            const pass = document.getElementById('passCode').value.trim();
+            if(pass === "33c" && key) {
+                API_KEY = key;
+                AUTHENTICATED = true;
+                const status = document.getElementById('uplink-status');
+                status.innerText = "CONNECTION: ESTABLISHED";
+                status.style.color = "var(--oracle-cyan)";
+                alert("AUTHENTICATION SUCCESSFUL.");
+            } else {
+                alert("ACCESS DENIED.");
+            }
+        };
+
+        async function run() {
+            const input = document.getElementById('userInput').value;
+            if(!input || !AUTHENTICATED) return;
+            const chat = document.getElementById('chat-window');
+            const u = document.createElement('div'); u.className='msg user'; u.innerText=input; chat.appendChild(u);
+            document.getElementById('userInput').value='';
+            const b = document.createElement('div'); b.className='msg bot'; b.innerText='Processing...'; chat.appendChild(b);
+            try {
+                const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method:"POST", headers:{"Authorization":`Bearer ${API_KEY}`,"Content-Type":"application/json"},
+                    body:JSON.stringify({"model":"google/gemma-7b-it:free","messages":[{"role":"user","content":input}]})
+                });
+                const d = await r.json();
+                b.innerText = d.choices[0].message.content;
+            } catch(e) { b.innerText = "Error: Handshake Failed."; }
+            chat.scrollTop = chat.scrollHeight;
+        }
+        document.getElementById('sendBtn').onclick = run;
+    </script>
+</body>
+</html>
